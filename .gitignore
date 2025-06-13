@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+.env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# macOS Finder files
+.DS_Store
+
+# IDE/editor folders
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logs and outputs
+*.log
+
+# Data files (optional; include if you don't want to commit large data)
+# If you commit processed CSV, leave these commented out.
+# data/raw/
+# data/processed/employee_attrition_clean.csv
+
+# Python virtual environment cache
+pip-log.txt
+
+# pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# OS-specific
+Thumbs.db
+desktop.ini
