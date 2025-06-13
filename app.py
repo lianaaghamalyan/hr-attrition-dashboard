@@ -63,6 +63,13 @@ def add_derived_columns(df_in):
                 ).astype('category')
             except Exception:
                 pass
+    for sat_col in ['JobSatisfaction', 'EnvironmentSatisfaction', 'RelationshipSatisfaction']:
+        if sat_col in df2.columns:
+            df2[sat_col] = pd.Categorical(
+                df2[sat_col],
+                categories=['Very High', 'High', 'Medium', 'Low'],
+                ordered=True
+            )
     return df2
 
 df = add_derived_columns(df)
@@ -79,7 +86,11 @@ groupable_columns = categorical_columns + numeric_columns
 
 # Satisfaction columns to exclude from grouping in the “Satisfaction-driven Attrition” page
 SAT_COLS = ['JobSatisfaction', 'EnvironmentSatisfaction', 'RelationshipSatisfaction']
-groupable_no_sat = [col for col in groupable_columns if col not in SAT_COLS]
+groupable_no_sat = [
+    col
+    for col in groupable_columns
+    if col not in SAT_COLS and col != 'Attrition'
+]
 
 # For Distribution Explorer: exclude satisfaction columns
 explorer_columns = [c for c in categorical_columns if c not in set(SAT_COLS)]
@@ -90,6 +101,13 @@ for sat in SAT_COLS:
         raise ValueError(f"Column '{sat}' not found in data.")
 if 'Attrition' not in df.columns:
     raise ValueError("Column 'Attrition' not found in data.")
+
+SAT_COLOR_MAP = {
+    'Low'        : '#f16266',  # bright red
+    'Medium'     : '#f7a1a4',  # orange
+    'High'       : '#9190ca',  # light blue
+    'Very High'  : '#4d4ea1',  # dark blue
+}
 
 # ----------------------------
 # 3. Initialize Dash app
@@ -116,22 +134,21 @@ sidebar = html.Div(
             pills=True,
         ),
     ],
-    style={
+    className="sidebar",  # ← here
+    style={  # you can keep only positioning here
         "position": "fixed",
         "top": 0,
         "left": 0,
         "bottom": 0,
         "width": "16rem",
         "padding": "2rem 1rem",
-        "background-color": "#f8f9fa",
-    },
+    }
 )
 
 # ----------------------------
 # 5. Hidden placeholder for groupby-filter
 # ----------------------------
-# This invisible RangeSlider ensures Dash always registers id='groupby-filter',
-# avoiding “nonexistent object” errors when callbacks reference it.
+
 hidden_filter = html.Div(
     dcc.RangeSlider(id='groupby-filter', min=0, max=1, value=[0, 1]),
     style={'display': 'none'}
@@ -151,16 +168,14 @@ def page_about():
         ),
         html.H4("Story", className="mt-5"),
         html.P(
-            "We examine factors behind employee attrition: demographics, job details and satisfaction—"
-            "to uncover patterns that help HR improve retention."
+            "This project investigates the factors associated with employee attrition, including demographics (e.g., age, gender), job characteristics (e.g., role, level) and satisfaction indicators. The dashboard is designed to reveal patterns that may explain why employees leave, enabling HR professionals to develop more effective retention strategies."
         ),
         html.H4("Audience", className="mt-4"),
         html.P(
-            "Designed for HR professionals, people ops managers, and decision-makers seeking data-driven insights "
-            "into turnover. Also relevant for researchers and analysts in workforce studies."
+            "This dashboard is intended for HR professionals, people operations managers, and organizational decision-makers who seek data-driven insights into employee turnover. It is also relevant for researchers and analysts in organizational behavior, workforce analytics and human resource management, providing a practical case for applied data analysis in retention strategy development."
         ),
         html.H4("Data", className="mt-4"),
-        html.P("Kaggle HR Analytics Employee Attrition (~1,470 rows × ~35 columns)."),
+        html.P("We use the Kaggle HR Analytics Employee Attrition dataset (~1,470 records × ~35 columns). It contains fields like Age, Gender, Department, JobRole, Satisfaction ratings, WorkLifeBalance, OverTime, YearsAtCompany, MonthlyIncome and Attrition flag. All missing values have been handled and ordinal scales mapped to clear labels."),
         html.H4("Dataset Link", className="mt-4"),
         html.P([
             html.A(
@@ -173,7 +188,7 @@ def page_about():
         html.Ul([
             html.Li("Jupyter Notebook for data loading, cleaning, analysis and feature engineering."),
             html.Li("Dash + Plotly for interactive charts and filters."),
-            html.Li("Dash Bootstrap Components for consistent layout and styling."),
+            html.Li("Dash Bootstrap Components for layout and styling."),
         ]),
         html.H2("How to Use", className="mt-5"),
         html.P("Use the left menu to navigate:"),
@@ -655,6 +670,7 @@ def update_groupby_plots(group_var, filter_value):
             color=sat_col,
             facet_col='Attrition',
             barmode='stack',
+            color_discrete_map=SAT_COLOR_MAP,
             category_orders={sat_col: sat_order, grp_col: levels},
             labels={'Pct': 'Percentage (%)', grp_col: group_var},
             title=f"{sat_col} distribution by Attrition across {group_var}"
@@ -816,7 +832,11 @@ def update_diverging(factor):
         x=['Yes_neg', 'No_pos'],
         orientation='h',
         title=f"Diverging Attrition vs Retention by {factor}",
-        labels={'value': 'Percentage', 'variable': 'Category'}
+        labels={'value': 'Percentage', 'variable': 'Category'},
+        color_discrete_map={
+            'Yes_neg': '#ffdb99',  # Attrition (Yes)
+            'No_pos': '#9999ff'  # Retention (No)
+        }
     )
     fig.add_vline(x=0, line_width=1, line_dash="dash", line_color="black")
     for trace in fig.data:
