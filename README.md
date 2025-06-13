@@ -6,6 +6,7 @@ This repository contains:
 - The original raw dataset from Kaggle (`data/raw/Cleaned_Employee_Data.xlsx`).
 - The cleaned CSV (`data/processed/employee_attrition_clean.csv`) used by the Dash app.
 - The Dash application script (`app.py`) which can be run directly to launch the dashboard.
+- Custom styling in `assets/custom.css` for a dark‐mode sidebar and improved navigation menu.  
 
 
 ## Overview
