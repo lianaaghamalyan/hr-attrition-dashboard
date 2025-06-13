@@ -5,6 +5,20 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import plotly.graph_objects as go
+import plotly.io as pio
+import copy
+
+
+MY_QUALITATIVE = px.colors.qualitative.Pastel
+base = copy.deepcopy(pio.templates["plotly_white"])
+pio.templates["custom_light"] = base
+pio.templates["custom_light"].layout.colorway = MY_QUALITATIVE
+pio.templates["custom_light"].layout.paper_bgcolor = "white"
+pio.templates["custom_light"].layout.plot_bgcolor = "white"
+pio.templates["custom_light"].layout.xaxis = dict(gridcolor="#e5e5e5", zerolinecolor="#e5e5e5")
+pio.templates["custom_light"].layout.yaxis = dict(gridcolor="#e5e5e5", zerolinecolor="#e5e5e5")
+pio.templates["custom_light"].layout.legend = dict(bgcolor="rgba(255,255,255,0.8)")
+pio.templates.default = "custom_light"
 
 # ----------------------------
 # 1. Load and preprocess data
@@ -80,8 +94,7 @@ if 'Attrition' not in df.columns:
 # ----------------------------
 # 3. Initialize Dash app
 # ----------------------------
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
-                suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY], suppress_callback_exceptions=True)
 server = app.server
 
 # ----------------------------
